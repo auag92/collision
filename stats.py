@@ -22,7 +22,7 @@ def get_scaled_positions(coords, cell, pbc, wrap=True):
         for i, periodic in enumerate(pbc):
             if periodic:
                 # Yes, we need to do it twice.
-                # See the scaled_positions.py test.
+                # See the scaled_positions.py test in ase library.
                 fractional[:, i] %= 1.0
                 fractional[:, i] %= 1.0
     return fractional
@@ -41,15 +41,16 @@ def get_kdTree(coords, cell_dim, cutoff):
     tree = MDAnalysis.lib.pkdtree.PeriodicKDTree(box=cell_dim.astype(np.float32))
     tree.set_coords(coords.astype(np.float32), 
                     cutoff=np.float32(cutoff))
+    
     return tree
 
 
 @curry
 def get_realStats(coords_all, coords_sub, indexes, r_stat, cell, pbc):
     
-    scaled_coords = get_scaled_positions(cell=cell, pbc=pbc, wrap=True)
+    frac_coords = get_scaled_positions(cell=cell, pbc=pbc, wrap=True)
     real_coords = get_real_positions(cell=cell)
-    rescale = compose(real_coords, scaled_coords)
+    rescale = compose(real_coords, frac_coords)
     
     return pipe(indexes, 
                 lambda indxs: rescale(coords_all[indxs[:,1]] - coords_sub[indxs[:,0]] + cell.diagonal()/2), 
