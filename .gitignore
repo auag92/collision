@@ -1,7 +1,10 @@
+# files
+*.pkl
+*.npy
+*.vtk
+
 # data-folders
-rmsds/
-structs/
-saeds/
+data/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
