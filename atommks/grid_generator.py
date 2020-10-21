@@ -1,3 +1,6 @@
+"""
+@author: ashanker9@gatech.edu
+"""
 import ase
 import numpy as np
 from .helpers import *

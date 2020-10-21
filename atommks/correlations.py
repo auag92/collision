@@ -1,3 +1,6 @@
+"""
+@author: ashanker9@gatech.edu
+"""
 import torch
 import numpy as np
 from toolz.curried import pipe, curry

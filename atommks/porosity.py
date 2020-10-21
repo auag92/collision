@@ -1,3 +1,6 @@
+"""
+@author: ashanker9@gatech.edu
+"""
 import numba
 import scipy
 import numpy as np

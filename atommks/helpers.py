@@ -1,3 +1,8 @@
+"""
+@author: ashanker9@gatech.edu
+"""
+import numba
+import pickle
 import numpy as np
 from toolz.curried import curry, pipe
 
@@ -12,7 +17,7 @@ except ImportError:
     pass
 
 try:
-    import torch
+    import torch1
     torch_rfft = curry(torch.rfft) # pylint: disable=invalid-name
     torch_irfft = curry(torch.irfft) # pylint: disable=invalid-name
 
@@ -54,14 +59,14 @@ try:
                     lambda x: np.fft.fftshift(x))
 except ImportError:
     @curry
-    def imfilter(x_data, f_data):
+    def imfilter(f_data1, f_data2):
         """
         to convolve f_data over x_data
         """
-        return pipe(f_data,
+        return pipe(f_data2,
                     lambda x: np.fft.ifftshift(x),
                     lambda x: np.fft.fftn(x),
-                    lambda x: np.conj(x) * np.fft.fftn(x_data),
+                    lambda x: np.conj(x) * np.fft.fftn(f_data1),
                     lambda x: np.fft.ifftn(x),
                     lambda x: np.absolute(x))
     print("you can install torch for speed-up as - ")
@@ -128,3 +133,53 @@ def write2vtk(matrix, fname="zeo.vtk"):
             v = ["%1.5f"%x for x in np.round(100 * v / mx)]
             line = " ".join(v)
             f.write(line+"\n")
+
+### ******* New code added to support rdf signal smoothening ********
+
+@curry
+def epanechnikov_fn(u, h):
+    p = 0.75*(5**(-0.5))*(1 - (u**2)/(5*h**2))/h
+    p[p<0] = 0
+    return p
+
+
+@curry
+def epanechnikov_kernel(width, x):
+    steps = x[1:] - x[:-1]
+    width = width/np.sqrt(5)
+    k_half = int((np.sqrt(5)*width)//steps[0] + 1)
+    u = np.linspace(-k_half*steps[0],k_half*steps[0],k_half*2+1)
+    kernel = epanechnikov_fn(u=u, h=width)
+    shift_to_mid = -len(kernel)//2 + 1
+    kernel_arr = np.zeros(len(x))
+    kernel_arr[:len(kernel)] = kernel
+    kernel_arr = np.roll(kernel_arr, shift_to_mid)
+    return kernel_arr
+
+
+@curry
+def convolve_kernel(kernel_arr, sig):
+    h1 = np.fft.fftn(kernel_arr)
+    h2 = np.fft.fftn(sig)
+    density = np.fft.ifftn(h1.conj() * h2).real
+    return density
+
+## General purpose helpers
+
+@curry
+def save_file(fname, obj):
+    """
+    save python object as a pickle
+    """
+    with open(fname, 'wb') as handle:
+        pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+        
+def load_file(fname):
+    """
+    load python object from pickle file
+    """
+    with open(fname, 'rb') as handle:
+        obj = pickle.load(handle)
+    return obj
+
