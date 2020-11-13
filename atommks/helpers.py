@@ -17,7 +17,7 @@ except ImportError:
     pass
 
 try:
-    import torch1
+    import torch
     torch_rfft = curry(torch.rfft) # pylint: disable=invalid-name
     torch_irfft = curry(torch.irfft) # pylint: disable=invalid-name
 
@@ -98,19 +98,40 @@ def padder(inp, shape, const_val=0):
     return np.pad(inp, ((ls[0], hs[0]), (ls[1], hs[1]), (ls[2], hs[2])), 'constant', constant_values=const_val)
 
 
+# @curry
+# def return_slice(x_data, cutoff):
+
+#     s  = (np.asarray(x_data.shape) // 2 + 1).astype(int)
+#     cutoff = (np.asarray(cutoff) // 2 + 1).astype(int)
+
+#     if x_data.ndim == 2:
+#         return x_data[(s[0] - cutoff[0]):(s[0] + cutoff[0] + 1),
+#                       (s[1] - cutoff[1]):(s[1] + cutoff[1] + 1)]
+#     elif x_data.ndim ==3:
+#         return x_data[(s[0] - cutoff[0]):(s[0] + cutoff[0] + 1),
+#                       (s[1] - cutoff[1]):(s[1] + cutoff[1] + 1),
+#                       (s[2] - cutoff[2]):(s[2] + cutoff[2] + 1)]
+#     else:
+#         print('Incorrect Number of Dimensions!')
+        
+     
 @curry
-def return_slice(x_data, cutoff):
-
-    s  = (np.asarray(x_data.shape) // 2 + 1).astype(int)
-    cutoff = (np.asarray(cutoff) // 2 + 1).astype(int)
-
+def return_slice(x_data, cutoff=5, s=None):
+    """
+    returns region of interest around the center voxel 
+    upto the cutoff length
+    """
+    
+    if not s:
+        s = np.asarray(x_data.shape).astype(int) // 2
+    
     if x_data.ndim == 2:
-        return x_data[(s[0] - cutoff[0]):(s[0] + cutoff[0] + 1),
-                      (s[1] - cutoff[1]):(s[1] + cutoff[1] + 1)]
+        return x_data[(s[0] - cutoff):(s[0] + cutoff+1),
+                      (s[1] - cutoff):(s[1] + cutoff+1)]
     elif x_data.ndim ==3:
-        return x_data[(s[0] - cutoff[0]):(s[0] + cutoff[0] + 1),
-                      (s[1] - cutoff[1]):(s[1] + cutoff[1] + 1),
-                      (s[2] - cutoff[2]):(s[2] + cutoff[2] + 1)]
+        return x_data[(s[0] - cutoff):(s[0] + cutoff+1),
+                      (s[1] - cutoff):(s[1] + cutoff+1),
+                      (s[2] - cutoff):(s[2] + cutoff+1)]
     else:
         print('Incorrect Number of Dimensions!')
 

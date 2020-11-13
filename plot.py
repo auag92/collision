@@ -26,3 +26,17 @@ def draw_2d(im, title=None):
     plt.colorbar()
     plt.axis('off')
     plt.show()
+    
+    
+def draw_2d_by_side(im1, im2):
+    """
+    plot a 2d image
+    """
+    fig, axs = plt.subplots(1, 2, figsize=[12, 6])
+    axs[0].imshow(im1)
+    axs[1].imshow(im2)
+    for idx, ax in enumerate(fig.get_axes()):
+        ax.label_outer()
+        if idx > 0:
+            ax.axis('off')
+    plt.show()
